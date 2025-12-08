@@ -1,7 +1,24 @@
 services:
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: RABBIT_MQ
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - .env.docker.rabbitmq
+    networks:
+      - urban-flow-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   user-database:
     image: postgres:15
+    container_name: user-database
     env_file:
       - .env.docker.auth
     ports:
@@ -10,20 +27,62 @@ services:
       - user-database:/var/lib/postgresql/data
     networks:
       - urban-flow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   auth-service:
     build: ./modules/auth
+    container_name: auth-service
     env_file:
       - .env.docker.auth
     ports:
-      - "4001:3000"
+      - "4001:4001"
     depends_on:
-      - user-database
+      user-database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - urban-flow-network
+
+  logs-database:
+    image: postgres:15
+    container_name: logs-database
+    env_file:
+      - .env.docker.logs
+    ports:
+      - "5002:5432"
+    volumes:
+      - logs-database:/var/lib/postgresql/data
+    networks:
+      - urban-flow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  logs-service:
+    build: ./modules/logs
+    container_name: logs-service
+    env_file:
+      - .env.docker.logs
+    ports:
+      - "4002:4002"
+    depends_on:
+      logs-database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - urban-flow-network
 
 volumes:
   user-database:
+  logs-database:
 
 networks:
   urban-flow-network:
