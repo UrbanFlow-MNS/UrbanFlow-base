@@ -1,15 +1,30 @@
 services:
-  keycloak-service:
-    image: quay.io/keycloak/keycloak:24.0
+
+  user-database:
+    image: postgres:15
     env_file:
-      - .env.docker.keycloak
-    command: ["start-dev", "--http-port", "7080", "--https-port", "7443"]
+      - .env.docker.auth
     ports:
-      - "7080:7080"
-      - "7443:7443"
+      - "5001:5432"
+    volumes:
+      - user-database:/var/lib/postgresql/data
     networks:
-      - local_network
+      - urban-flow-network
+
+  auth-service:
+    build: ./modules/auth
+    env_file:
+      - .env.docker.auth
+    ports:
+      - "4001:3000"
+    depends_on:
+      - user-database
+    networks:
+      - urban-flow-network
+
+volumes:
+  user-database:
 
 networks:
-  local_network:
+  urban-flow-network:
     driver: bridge

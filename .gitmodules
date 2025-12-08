@@ -2,3 +2,6 @@
 	path = modules/trips-planner
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-trips-planner.git
 	branch = develop
+[submodule "modules/auth"]
+	path = modules/auth
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-auth.git
