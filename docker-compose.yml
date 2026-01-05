@@ -80,6 +80,20 @@ services:
     networks:
       - urban-flow-network
 
+  gateway-service:
+    build: ./modules/gateway
+    container_name: gateway-service
+    env_file:
+      - .env.docker.gateway
+    ports:
+      - "4000:4000"
+    depends_on:      
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - urban-flow-network
+
+
 volumes:
   user-database:
   logs-database:
