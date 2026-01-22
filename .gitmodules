@@ -5,9 +5,16 @@
 [submodule "modules/auth"]
 	path = modules/auth
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-auth.git
+    branch = develop
 [submodule "modules/logs"]
 	path = modules/logs
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-logs.git
+    branch = develop
 [submodule "modules/gateway"]
 	path = modules/gateway
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-gateway.git
+    branch = develop
+[submodule "modules/user"]
+	path = modules/user
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-user.git
+    branch = develop
