@@ -53,6 +53,19 @@ services:
       retries: 5
 
   # Services
+  gateway-service:
+    build: ./modules/gateway
+    container_name: gateway-service
+    env_file:
+      - .env.docker.gateway
+    ports:
+      - "4000:4000"
+    depends_on:      
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - urban-flow-network
+
   auth-service:
     build: ./modules/auth
     container_name: auth-service
@@ -96,13 +109,13 @@ services:
     networks:
       - urban-flow-network
 
-  gateway-service:
-    build: ./modules/gateway
-    container_name: gateway-service
+  trips-planner-service:
+    build: ./modules/trips-planner
+    container_name: trips-planner-service
     env_file:
-      - .env.docker.gateway
+      - .env.docker.trips-planner
     ports:
-      - "4000:4000"
+      - "4007:4007"
     depends_on:      
       rabbitmq:
         condition: service_healthy
