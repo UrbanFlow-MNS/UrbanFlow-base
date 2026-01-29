@@ -18,3 +18,6 @@
 	path = modules/user
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-user.git
     branch = develop
+[submodule "modules/trips"]
+	path = modules/trips
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-trips.git

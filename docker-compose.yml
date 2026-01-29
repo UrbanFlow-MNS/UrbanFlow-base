@@ -30,7 +30,7 @@ services:
     networks:
       - urban-flow-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_user_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,7 +47,24 @@ services:
     networks:
       - urban-flow-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_logs_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  trips-database:
+    image: postgres:15
+    container_name: trips-database
+    env_file:
+      - .env.docker.trips
+    ports:
+      - "5003:5432"
+    volumes:
+      - trips-database:/var/lib/postgresql/data
+    networks:
+      - urban-flow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_trips_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -109,6 +126,21 @@ services:
     networks:
       - urban-flow-network
 
+  trips-service:
+    build: ./modules/trips/UrbanFlow-trips
+    container_name: trips-service
+    env_file:
+      - .env.docker.trips
+    ports:
+      - "4003:4003"
+    depends_on:
+      logs-database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - urban-flow-network
+
   trips-planner-service:
     build: ./modules/trips-planner
     container_name: trips-planner-service
@@ -125,6 +157,7 @@ services:
 volumes:
   user-database:
   logs-database:
+  trips-database:
 
 networks:
   urban-flow-network:
