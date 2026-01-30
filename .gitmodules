@@ -21,3 +21,8 @@
 [submodule "modules/trips"]
 	path = modules/trips
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-trips.git
+    branch = develop
+[submodule "modules/notifications"]
+	path = modules/notifications
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-notifications.git
+    branch = develop

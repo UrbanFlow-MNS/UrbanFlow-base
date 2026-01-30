@@ -30,7 +30,7 @@ services:
     networks:
       - urban-flow-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_user_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_user_db"] # TODO: Delete ? Faille de sécu ?
       interval: 10s
       timeout: 5s
       retries: 5
@@ -68,6 +68,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  notification-database:
+    image: postgres:15
+    container_name: notification-database
+    env_file:
+      - .env.docker.notification
+    ports:
+      - "5007:5432"
+    volumes:
+      - notification-database:/var/lib/postgresql/data
+    networks:
+      - urban-flow-network
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 
   # Services
   gateway-service:
@@ -147,8 +164,23 @@ services:
     env_file:
       - .env.docker.trips-planner
     ports:
-      - "4007:4007"
+      - "4008:4008"
     depends_on:      
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - urban-flow-network
+  
+  notification-service:
+    build: ./modules/notifications
+    container_name: notification-service
+    env_file:
+      - .env.docker.notification
+    ports:
+      - "4007:4007"
+    depends_on:
+      notification-database:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     networks:
@@ -158,6 +190,7 @@ volumes:
   user-database:
   logs-database:
   trips-database:
+  notification-database:
 
 networks:
   urban-flow-network:
