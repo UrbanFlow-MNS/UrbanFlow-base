@@ -149,14 +149,17 @@ services:
     env_file:
       - .env.docker.trips
     ports:
-      - "4003:4003"
+      - "4003:8080" 
+      - "6003:6003" 
     depends_on:
-      logs-database:
+      trips-database:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
     networks:
       - urban-flow-network
+
+
 
   trips-planner-service:
     build: ./modules/trips-planner
