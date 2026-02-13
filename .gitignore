@@ -1,2 +1,4 @@
 .env.docker*
 .DS_Store
+.idea/*
+/.idea
