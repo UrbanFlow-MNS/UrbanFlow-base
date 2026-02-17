@@ -1,0 +1,52 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'RabbitMQ'
+    static_configs:
+      - targets: [ 'rabbitmq:15692' ]
+
+  - job_name: 'bato-gateway'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['gateway-service:4000']
+
+  - job_name: 'bato-auth'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: [ 'auth-service:4001' ]
+
+  - job_name: 'bato-logs'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: [ 'logs-service:4002' ]
+
+  - job_name: 'bato-trips'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: [ 'trips-service:4003' ]
+
+  - job_name: 'bato-monitoring'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['monitoring-service:4005']
+
+  - job_name: 'bato-user'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: [ 'user-service:4006' ]
+
+  - job_name: 'bato-notification'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: [ 'notification-service:4007' ]
+
+  - job_name: 'bato-trips-planner'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: [ 'trips-planner-service:4008' ]
+
+  - job_name: node
+    static_configs:
+      - targets: [ 'node_exporter:9100' ]
