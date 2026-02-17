@@ -90,15 +90,14 @@ services:
         timeout: 5s
         retries: 5
 
-  monitoring-db:
+  monitoring-database:
     image: postgres:15
-    container_name: monitoring-db
     env_file:
       - .env.docker.monitoring
     ports:
       - "5005:5432"
     volumes:
-      - monitoring-db:/var/lib/postgresql/data
+      - monitoring-database:/var/lib/postgresql/data
     networks:
       - urban-flow-network
     healthcheck:
@@ -180,8 +179,6 @@ services:
     networks:
       - urban-flow-network
 
-
-
   trips-planner-service:
     build: ./modules/trips-planner
     container_name: trips-planner-service
@@ -217,7 +214,7 @@ services:
     ports:
       - "4005:4005"
     depends_on:
-      monitoring-db:
+      monitoring-database:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -255,6 +252,7 @@ volumes:
   logs-database:
   trips-database:
   notification-database:
+  monitoring-database:
 
 networks:
   urban-flow-network:
