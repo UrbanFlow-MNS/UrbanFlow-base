@@ -7,6 +7,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "15692:15692"
+
     env_file:
       - .env.docker.rabbitmq
     networks:
@@ -16,6 +18,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    command: >
+      sh -c "rabbitmq-plugins enable --offline rabbitmq_prometheus && rabbitmq-server"
 
   # Databases
   user-database:
@@ -85,6 +89,23 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
+
+  monitoring-db:
+    image: postgres:15
+    container_name: monitoring-db
+    env_file:
+      - .env.docker.monitoring
+    ports:
+      - "5005:5432"
+    volumes:
+      - monitoring-db:/var/lib/postgresql/data
+    networks:
+      - urban-flow-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres_logs" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Services
   gateway-service:
@@ -188,6 +209,46 @@ services:
         condition: service_healthy
     networks:
       - urban-flow-network
+
+  monitoring-service:
+    build: ./modules/monitoring
+    env_file:
+      - .env.docker.monitoring
+    ports:
+      - "4005:4005"
+    depends_on:
+      monitoring-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - urban-flow-network
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - urban-flow-network
+    restart: unless-stopped
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+    networks:
+      - urban-flow-network
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro'
+
 
 volumes:
   user-database:
