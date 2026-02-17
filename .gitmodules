@@ -26,3 +26,6 @@
 	path = modules/notifications
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-notifications.git
     branch = develop
+[submodule "modules/monitoring"]
+	path = modules/monitoring
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-monitoring.git
