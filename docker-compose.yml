@@ -8,7 +8,6 @@ services:
       - "5672:5672"
       - "15672:15672"
       - "15692:15692"
-
     env_file:
       - .env.docker.rabbitmq
     networks:
@@ -27,8 +26,6 @@ services:
     container_name: user-database
     env_file:
       - .env.docker.user
-    ports:
-      - "5006:5432"
     volumes:
       - user-database:/var/lib/postgresql/data
     networks:
@@ -44,8 +41,6 @@ services:
     container_name: logs-database
     env_file:
       - .env.docker.logs
-    ports:
-      - "5002:5432"
     volumes:
       - logs-database:/var/lib/postgresql/data
     networks:
@@ -61,8 +56,6 @@ services:
     container_name: trips-database
     env_file:
       - .env.docker.trips
-    ports:
-      - "5003:5432"
     volumes:
       - trips-database:/var/lib/postgresql/data
     networks:
@@ -78,8 +71,6 @@ services:
     container_name: notification-database
     env_file:
       - .env.docker.notification
-    ports:
-      - "5007:5432"
     volumes:
       - notification-database:/var/lib/postgresql/data
     networks:
@@ -94,8 +85,6 @@ services:
     image: postgres:15
     env_file:
       - .env.docker.monitoring
-    ports:
-      - "5005:5432"
     volumes:
       - monitoring-database:/var/lib/postgresql/data
     networks:
@@ -125,8 +114,6 @@ services:
     container_name: auth-service
     env_file:
       - .env.docker.auth
-    ports:
-      - "4001:4001"
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -138,8 +125,6 @@ services:
     container_name: user-service
     env_file:
       - .env.docker.user
-    ports:
-      - "4006:4006"
     depends_on:
       user-database:
         condition: service_healthy
@@ -153,8 +138,6 @@ services:
     container_name: logs-service
     env_file:
       - .env.docker.logs
-    ports:
-      - "4002:4002"
     depends_on:
       logs-database:
         condition: service_healthy
@@ -168,9 +151,6 @@ services:
     container_name: trips-service
     env_file:
       - .env.docker.trips
-    ports:
-      - "4003:8080" 
-      - "6003:6003" 
     depends_on:
       trips-database:
         condition: service_healthy
@@ -184,8 +164,6 @@ services:
     container_name: trips-planner-service
     env_file:
       - .env.docker.trips-planner
-    ports:
-      - "4008:4008"
     depends_on:      
       rabbitmq:
         condition: service_healthy
@@ -197,8 +175,6 @@ services:
     container_name: notification-service
     env_file:
       - .env.docker.notification
-    ports:
-      - "4007:4007"
     depends_on:
       notification-database:
         condition: service_healthy
@@ -211,8 +187,6 @@ services:
     build: ./modules/monitoring
     env_file:
       - .env.docker.monitoring
-    ports:
-      - "4005:4005"
     depends_on:
       monitoring-database:
         condition: service_healthy
