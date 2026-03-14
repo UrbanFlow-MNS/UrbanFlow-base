@@ -29,3 +29,7 @@
 [submodule "modules/monitoring"]
 	path = modules/monitoring
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-monitoring.git
+[submodule "modules/incidents"]
+	path = modules/incidents
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-incidents.git
+	branch = develop

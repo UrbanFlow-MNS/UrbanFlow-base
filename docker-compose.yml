@@ -81,6 +81,21 @@ services:
         timeout: 5s
         retries: 5
 
+  incident-database:
+    image: postgres:15
+    container_name: incident-database
+    env_file:
+      - .env.docker.incident
+    volumes:
+      - incident-database:/var/lib/postgresql/data
+    networks:
+      - urban-flow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   monitoring-database:
     image: postgres:15
     env_file:
@@ -183,6 +198,19 @@ services:
     networks:
       - urban-flow-network
 
+  incident-service:
+    build: ./modules/incidents
+    container_name: incident-service
+    env_file:
+      - .env.docker.incident
+    depends_on:
+      incident-database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - urban-flow-network
+
   monitoring-service:
     build: ./modules/monitoring
     env_file:
@@ -226,6 +254,7 @@ volumes:
   logs-database:
   trips-database:
   notification-database:
+  incident-database:
   monitoring-database:
 
 networks:
