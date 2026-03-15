@@ -3,3 +3,5 @@
 .idea/*
 /.idea
 MEMORY.md
+docker-compose.yml.backup
+docker-compose.all 
