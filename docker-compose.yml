@@ -175,7 +175,7 @@ services:
       - urban-flow-network
 
   trips-planner-service:
-    build: ./modules/trips-planner/UrbanFlow-trips-planner
+    build: ./modules/trips-planner
     container_name: trips-planner-service
     env_file:
       - .env.docker.trips-planner
