@@ -90,17 +90,18 @@ jobs:
           [ "${{ needs.detect-changes.outputs.monitoring }}" = "true" ] && SERVICES="$SERVICES monitoring-service"
           [ "${{ needs.detect-changes.outputs.incidents }}" = "true" ] && SERVICES="$SERVICES incident-service"
           SERVICES="${SERVICES# }"
-          echo "list=$SERVICES" >> $GITHUB_OUTPUT
+          SERVICES_CSV="${SERVICES// /,}"
+          echo "list=$SERVICES_CSV" >> $GITHUB_OUTPUT
 
           DEPLOY_ALL="${{ needs.detect-changes.outputs['docker-compose'] }}"
           echo "deploy_all=$DEPLOY_ALL" >> $GITHUB_OUTPUT
 
-          echo "Debug - Services: $SERVICES"
+          echo "Debug - Services: $SERVICES_CSV"
           echo "Debug - Deploy all: $DEPLOY_ALL"
 
       - name: Deploy via SSH
         run: |
-          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} /bin/bash << EOF
+          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} bash << EOF
             set -e
             cd UrbanFlow-base
 
@@ -124,8 +125,7 @@ jobs:
               echo "🚀 docker-compose changed, redeploying all services..."
               docker compose up -d --build
             elif [ -n "\$SERVICES" ]; then
-              read -ra SERVICE_ARRAY <<< "\$SERVICES"
-              for SERVICE in "\${SERVICE_ARRAY[@]}"; do
+              for SERVICE in \$(echo "\$SERVICES" | tr ',' ' '); do
                 echo "🚀 Redeploying \$SERVICE..."
                 docker compose up -d --build "\$SERVICE"
               done
