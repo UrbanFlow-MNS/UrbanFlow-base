@@ -124,9 +124,10 @@ jobs:
               echo "🚀 docker-compose changed, redeploying all services..."
               docker compose up -d --build
             elif [ -n "\$SERVICES" ]; then
-              for SERVICE in \$SERVICES; do
+              read -ra SERVICE_ARRAY <<< "\$SERVICES"
+              for SERVICE in "\${SERVICE_ARRAY[@]}"; do
                 echo "🚀 Redeploying \$SERVICE..."
-                docker compose up -d --build \$SERVICE
+                docker compose up -d --build "\$SERVICE"
               done
             else
               echo "✅ No service to redeploy."
