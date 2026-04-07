@@ -20,7 +20,7 @@ jobs:
       incidents: ${{ steps.changes.outputs.incidents }}
       docker-compose: ${{ steps.changes.outputs.docker-compose }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
           submodules: recursive
@@ -51,41 +51,56 @@ jobs:
     needs: detect-changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
-
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Deploy changed services via SSH
+      - name: Build services list
+        id: services
         run: |
-            sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
+          SERVICES=""
+          ${{ needs.detect-changes.outputs.gateway == 'true' && 'SERVICES="$SERVICES gateway-service"' || '' }}
+          ${{ needs.detect-changes.outputs.auth == 'true' && 'SERVICES="$SERVICES auth-service"' || '' }}
+          ${{ needs.detect-changes.outputs.user == 'true' && 'SERVICES="$SERVICES user-service"' || '' }}
+          ${{ needs.detect-changes.outputs.logs == 'true' && 'SERVICES="$SERVICES logs-service"' || '' }}
+          ${{ needs.detect-changes.outputs.trips == 'true' && 'SERVICES="$SERVICES trips-service"' || '' }}
+          ${{ needs.detect-changes.outputs['trips-planner'] == 'true' && 'SERVICES="$SERVICES trips-planner-service"' || '' }}
+          ${{ needs.detect-changes.outputs.notifications == 'true' && 'SERVICES="$SERVICES notification-service"' || '' }}
+          ${{ needs.detect-changes.outputs.monitoring == 'true' && 'SERVICES="$SERVICES monitoring-service"' || '' }}
+          ${{ needs.detect-changes.outputs.incidents == 'true' && 'SERVICES="$SERVICES incident-service"' || '' }}
+          echo "list=$SERVICES" >> $GITHUB_OUTPUT
+          echo "deploy_all=${{ needs.detect-changes.outputs['docker-compose'] }}" >> $GITHUB_OUTPUT
+
+      - name: Deploy via SSH
+        env:
+          SERVICES: ${{ steps.services.outputs.list }}
+          DEPLOY_ALL: ${{ steps.services.outputs.deploy_all }}
+        run: |
+          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} \
+            SERVICES="$SERVICES" DEPLOY_ALL="$DEPLOY_ALL" bash << 'EOF'
+            set -e
             cd UrbanFlow-base
-            git stash
-            git stash clear
 
-            git pull origin develop
+            echo "📥 Pulling base repo..."
+            git fetch origin develop
+            git reset --hard origin/develop
+
+            echo "📥 Pulling submodules..."
             git submodule update --init --recursive
-            git submodule foreach git checkout develop
-            git submodule foreach git pull
+            git submodule foreach '
+              git fetch origin develop
+              git checkout develop
+              git reset --hard origin/develop
+            '
 
-            redeploy() {
-              SERVICE=$1
-              echo "🚀 Redeploying $SERVICE..."
-              docker compose up -d --build $SERVICE
-            }
-            
-            ${{ needs.detect-changes.outputs.gateway == 'true' && 'redeploy gateway-service' || '# gateway unchanged' }}
-            ${{ needs.detect-changes.outputs.auth == 'true' && 'redeploy auth-service' || '# auth unchanged' }}
-            ${{ needs.detect-changes.outputs.user == 'true' && 'redeploy user-service' || '# user unchanged' }}
-            ${{ needs.detect-changes.outputs.logs == 'true' && 'redeploy logs-service' || '# logs unchanged' }}
-            ${{ needs.detect-changes.outputs.trips == 'true' && 'redeploy trips-service' || '# trips unchanged' }}
-            ${{ needs.detect-changes.outputs['trips-planner'] == 'true' && 'redeploy trips-planner-service' || '# trips-planner unchanged' }}
-            ${{ needs.detect-changes.outputs.notifications == 'true' && 'redeploy notification-service' || '# notifications unchanged' }}
-            ${{ needs.detect-changes.outputs.monitoring == 'true' && 'redeploy monitoring-service' || '# monitoring unchanged' }}
-            ${{ needs.detect-changes.outputs.incidents == 'true' && 'redeploy incident-service' || '# incidents unchanged' }}
-
-            ${{ needs.detect-changes.outputs['docker-compose'] == 'true' && 'docker compose up -d --build' || '# docker-compose unchanged' }}
-            EOF
+            if [ "$DEPLOY_ALL" = "true" ]; then
+              echo "🚀 docker-compose changed, redeploying all services..."
+              docker compose up -d --build
+            elif [ -n "$SERVICES" ]; then
+              for SERVICE in $SERVICES; do
+                echo "🚀 Redeploying $SERVICE..."
+                docker compose up -d --build $SERVICE
+              done
+            else
+              echo "✅ No service to redeploy."
+            fi
+          EOF
