@@ -99,12 +99,8 @@ jobs:
           echo "Debug - Deploy all: $DEPLOY_ALL"
 
       - name: Deploy via SSH
-        env:
-          SERVICES: ${{ steps.services.outputs.list }}
-          DEPLOY_ALL: ${{ steps.services.outputs.deploy_all }}
         run: |
-          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} \
-            SERVICES="$SERVICES" DEPLOY_ALL="$DEPLOY_ALL" bash << 'EOF'
+          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} bash << EOF
             set -e
             cd UrbanFlow-base
 
@@ -118,16 +114,19 @@ jobs:
               git pull origin develop
             '
 
-            echo "🔍 Services to deploy: $SERVICES"
-            echo "🔍 Deploy all: $DEPLOY_ALL"
+            SERVICES="${{ steps.services.outputs.list }}"
+            DEPLOY_ALL="${{ steps.services.outputs.deploy_all }}"
 
-            if [ "$DEPLOY_ALL" = "true" ]; then
+            echo "🔍 Services to deploy: \$SERVICES"
+            echo "🔍 Deploy all: \$DEPLOY_ALL"
+
+            if [ "\$DEPLOY_ALL" = "true" ]; then
               echo "🚀 docker-compose changed, redeploying all services..."
               docker compose up -d --build
-            elif [ -n "$SERVICES" ]; then
-              for SERVICE in $SERVICES; do
-                echo "🚀 Redeploying $SERVICE..."
-                docker compose up -d --build $SERVICE
+            elif [ -n "\$SERVICES" ]; then
+              for SERVICE in \$SERVICES; do
+                echo "🚀 Redeploying \$SERVICE..."
+                docker compose up -d --build \$SERVICE
               done
             else
               echo "✅ No service to redeploy."
