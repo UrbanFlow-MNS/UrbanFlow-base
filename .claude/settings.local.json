@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/tsementa/Downloads/UrbanFlow-base -type f -name *jwt* -o -name *token*)",
+      "Bash(ls /Users/tsementa/Downloads/UrbanFlow-base/.env*)",
+      "Bash(ls /Users/tsementa/Downloads/UrbanFlow-base/modules/gateway/.env*)",
+      "Bash(ls /Users/tsementa/Downloads/UrbanFlow-base/modules/auth/.env*)"
+    ]
+  }
+}
