@@ -81,14 +81,13 @@ jobs:
             cd UrbanFlow-base
 
             echo "📥 Pulling base repo..."
-            git reset --hard origin/develop
             git pull
 
             echo "📥 Pulling submodules..."
             git submodule update --init --recursive
             git submodule foreach '
               git checkout develop
-              git reset --hard origin/develop
+              git pull
             '
 
             if [ "$DEPLOY_ALL" = "true" ]; then
