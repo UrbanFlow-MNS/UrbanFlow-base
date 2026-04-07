@@ -81,14 +81,12 @@ jobs:
             cd UrbanFlow-base
 
             echo "📥 Pulling base repo..."
-            git checkout develop
             git reset --hard origin/develop
             git pull
 
             echo "📥 Pulling submodules..."
             git submodule update --init --recursive
             git submodule foreach '
-              git fetch origin develop
               git checkout develop
               git reset --hard origin/develop
             '
