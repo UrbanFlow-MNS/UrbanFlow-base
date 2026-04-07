@@ -33,7 +33,11 @@ jobs:
           echo "$CHANGED"
 
           check() {
-            echo "$CHANGED" | grep -qc "^modules/$1" && echo "true" || echo "false"
+            if echo "$CHANGED" | grep -q "^modules/$1"; then
+              echo "true"
+            else
+              echo "false"
+            fi
           }
 
           echo "gateway=$(check gateway)" >> $GITHUB_OUTPUT
@@ -69,6 +73,11 @@ jobs:
           ${{ needs.detect-changes.outputs.incidents == 'true' && 'SERVICES="$SERVICES incident-service"' || '' }}
           echo "list=$SERVICES" >> $GITHUB_OUTPUT
           echo "deploy_all=${{ needs.detect-changes.outputs['docker-compose'] }}" >> $GITHUB_OUTPUT
+
+      - name: Debug outputs
+        run: |
+          echo "Services to deploy: '${{ needs.detect-changes.outputs.gateway }}'"
+          echo "Full list: ${{ steps.services.outputs.list }}"
 
       - name: Deploy via SSH
         env:
