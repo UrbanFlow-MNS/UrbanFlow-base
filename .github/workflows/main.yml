@@ -20,7 +20,7 @@ jobs:
       incidents: ${{ steps.changes.outputs.incidents }}
       docker-compose: ${{ steps.changes.outputs.docker-compose }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 2
           submodules: recursive
@@ -68,6 +68,8 @@ jobs:
 
             git pull origin develop
             git submodule update --init --recursive
+            git submodule foreach git checkout develop
+            git submodule foreach git pull
 
             redeploy() {
               SERVICE=$1
