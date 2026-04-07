@@ -100,7 +100,7 @@ jobs:
 
       - name: Deploy via SSH
         run: |
-          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} bash << EOF
+          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} /bin/bash << EOF
             set -e
             cd UrbanFlow-base
 
