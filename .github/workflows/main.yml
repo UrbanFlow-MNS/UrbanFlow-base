@@ -80,17 +80,23 @@ jobs:
         id: services
         run: |
           SERVICES=""
-          ${{ needs.detect-changes.outputs.gateway == 'true' && 'SERVICES="$SERVICES gateway-service"' || '' }}
-          ${{ needs.detect-changes.outputs.auth == 'true' && 'SERVICES="$SERVICES auth-service"' || '' }}
-          ${{ needs.detect-changes.outputs.user == 'true' && 'SERVICES="$SERVICES user-service"' || '' }}
-          ${{ needs.detect-changes.outputs.logs == 'true' && 'SERVICES="$SERVICES logs-service"' || '' }}
-          ${{ needs.detect-changes.outputs.trips == 'true' && 'SERVICES="$SERVICES trips-service"' || '' }}
-          ${{ needs.detect-changes.outputs['trips-planner'] == 'true' && 'SERVICES="$SERVICES trips-planner-service"' || '' }}
-          ${{ needs.detect-changes.outputs.notifications == 'true' && 'SERVICES="$SERVICES notification-service"' || '' }}
-          ${{ needs.detect-changes.outputs.monitoring == 'true' && 'SERVICES="$SERVICES monitoring-service"' || '' }}
-          ${{ needs.detect-changes.outputs.incidents == 'true' && 'SERVICES="$SERVICES incident-service"' || '' }}
+          [ "${{ needs.detect-changes.outputs.gateway }}" = "true" ] && SERVICES="$SERVICES gateway-service"
+          [ "${{ needs.detect-changes.outputs.auth }}" = "true" ] && SERVICES="$SERVICES auth-service"
+          [ "${{ needs.detect-changes.outputs.user }}" = "true" ] && SERVICES="$SERVICES user-service"
+          [ "${{ needs.detect-changes.outputs.logs }}" = "true" ] && SERVICES="$SERVICES logs-service"
+          [ "${{ needs.detect-changes.outputs.trips }}" = "true" ] && SERVICES="$SERVICES trips-service"
+          [ "${{ needs.detect-changes.outputs['trips-planner'] }}" = "true" ] && SERVICES="$SERVICES trips-planner-service"
+          [ "${{ needs.detect-changes.outputs.notifications }}" = "true" ] && SERVICES="$SERVICES notification-service"
+          [ "${{ needs.detect-changes.outputs.monitoring }}" = "true" ] && SERVICES="$SERVICES monitoring-service"
+          [ "${{ needs.detect-changes.outputs.incidents }}" = "true" ] && SERVICES="$SERVICES incident-service"
+          SERVICES="${SERVICES# }"
           echo "list=$SERVICES" >> $GITHUB_OUTPUT
-          echo "deploy_all=${{ needs.detect-changes.outputs['docker-compose'] }}" >> $GITHUB_OUTPUT
+
+          DEPLOY_ALL="${{ needs.detect-changes.outputs['docker-compose'] }}"
+          echo "deploy_all=$DEPLOY_ALL" >> $GITHUB_OUTPUT
+
+          echo "Debug - Services: $SERVICES"
+          echo "Debug - Deploy all: $DEPLOY_ALL"
 
       - name: Deploy via SSH
         env:
