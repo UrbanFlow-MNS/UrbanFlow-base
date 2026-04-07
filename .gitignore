@@ -3,6 +3,7 @@
 .idea/*
 /.idea
 MEMORY.md
+.claude/*
 /.claude
 docker-compose.yml.backup
 docker-compose.all 
