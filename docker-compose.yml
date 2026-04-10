@@ -76,10 +76,10 @@ services:
     networks:
       - urban-flow-network
     healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U postgres_user"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
+      test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   incident-database:
     image: postgres:15
@@ -118,7 +118,7 @@ services:
       - .env.docker.gateway
     ports:
       - "4000:4000"
-    depends_on:      
+    depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
@@ -166,6 +166,8 @@ services:
     container_name: trips-service
     env_file:
       - .env.docker.trips
+    ports:
+      - "6003:6003"
     depends_on:
       trips-database:
         condition: service_healthy
@@ -179,7 +181,10 @@ services:
     container_name: trips-planner-service
     env_file:
       - .env.docker.trips-planner
-    depends_on:      
+    ports:
+      - "6008:6008"
+      - "4008:4008"
+    depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
