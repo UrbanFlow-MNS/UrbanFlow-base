@@ -33,3 +33,6 @@
 	path = modules/incidents
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-incidents.git
 	branch = develop
+[submodule "modules/transport-management"]
+	path = modules/transport-management
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-transport-management.git

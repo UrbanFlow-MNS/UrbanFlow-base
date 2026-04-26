@@ -56,6 +56,8 @@ services:
     container_name: trips-database
     env_file:
       - .env.docker.trips
+    ports:
+      - "5432:5432"
     volumes:
       - trips-database:/var/lib/postgresql/data
     networks:
@@ -110,6 +112,21 @@ services:
       timeout: 5s
       retries: 5
 
+  tm-database:
+    image: postgres:15
+    container_name: tm-database
+    env_file:
+      - .env.docker.tm
+    volumes:
+      - tm-database:/var/lib/postgresql/data
+    networks:
+      - urban-flow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_tm_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Services
   gateway-service:
     build: ./modules/gateway
@@ -153,6 +170,8 @@ services:
     container_name: logs-service
     env_file:
       - .env.docker.logs
+    ports:
+      - "4002:4002"
     depends_on:
       logs-database:
         condition: service_healthy
@@ -167,24 +186,10 @@ services:
     env_file:
       - .env.docker.trips
     ports:
-      - "6003:6003"
+      - "4003:4003"
     depends_on:
       trips-database:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
-
-  trips-planner-service:
-    build: ./modules/trips-planner
-    container_name: trips-planner-service
-    env_file:
-      - .env.docker.trips-planner
-    ports:
-      - "6008:6008"
-      - "4008:4008"
-    depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
@@ -230,6 +235,21 @@ services:
     networks:
       - urban-flow-network
 
+  tm-service:
+    build: ./modules/transport-management/UrbanFlow-transport-management
+    container_name: tm-service
+    env_file:
+      - .env.docker.tm
+    ports:
+      - "4009:4009"
+    depends_on:
+      tm-database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - urban-flow-network
+
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -263,6 +283,8 @@ volumes:
   notification-database:
   incident-database:
   monitoring-database:
+  tm-database:
+
 
 networks:
   urban-flow-network:
