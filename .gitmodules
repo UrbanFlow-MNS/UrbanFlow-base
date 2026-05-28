@@ -36,3 +36,7 @@
 [submodule "modules/transport-management"]
 	path = modules/transport-management
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-transport-management.git
+[submodule "frontend/auth"]
+	path = frontend/auth
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-auth-frontend.git
+	branch = develop
