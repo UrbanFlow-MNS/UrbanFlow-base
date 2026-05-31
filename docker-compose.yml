@@ -127,6 +127,20 @@ services:
       timeout: 5s
       retries: 5
 
+  # Frontend
+  auth-frontend:
+    build:
+      context: ./frontend/auth
+      args:
+        VITE_API_URL: http://localhost:4000
+    container_name: auth-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - gateway-service
+    networks:
+      - urban-flow-network
+
   # Services
   gateway-service:
     build: ./modules/gateway
