@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "1.0.0",
-    "description": "UrbanFlow design system — shared across all frontend apps",
+    "description": "UrbanFlow design system - shared across all frontend apps",
     "font_source": "https://fonts.google.com/specimen/Outfit",
     "usage": "Import this file in each frontend app to generate tailwind.config.js and shadcn CSS variables"
   },
