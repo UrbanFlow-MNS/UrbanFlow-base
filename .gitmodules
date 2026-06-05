@@ -40,3 +40,7 @@
 	path = frontend/auth
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-auth-frontend.git
 	branch = develop
+[submodule "frontend/incidents"]
+	path = frontend/incidents
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-incidents-frontend.git
+	branch = develop
