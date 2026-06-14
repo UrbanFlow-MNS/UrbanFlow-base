@@ -18,6 +18,8 @@ jobs:
       notifications: ${{ steps.changes.outputs.notifications }}
       monitoring: ${{ steps.changes.outputs.monitoring }}
       incidents: ${{ steps.changes.outputs.incidents }}
+      auth-frontend: ${{ steps.changes.outputs.auth-frontend }}
+      user-frontend: ${{ steps.changes.outputs.user-frontend }}
       docker-compose: ${{ steps.changes.outputs.docker-compose }}
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +40,14 @@ jobs:
             fi
           }
 
+          check_frontend() {
+            if echo "$CHANGED" | grep -q "^frontend/$1"; then
+              echo "true"
+            else
+              echo "false"
+            fi
+          }
+
           echo "gateway=$(check gateway)" >> $GITHUB_OUTPUT
           echo "auth=$(check auth)" >> $GITHUB_OUTPUT
           echo "user=$(check user)" >> $GITHUB_OUTPUT
@@ -47,6 +57,8 @@ jobs:
           echo "notifications=$(check notifications)" >> $GITHUB_OUTPUT
           echo "monitoring=$(check monitoring)" >> $GITHUB_OUTPUT
           echo "incidents=$(check incidents)" >> $GITHUB_OUTPUT
+          echo "auth-frontend=$(check_frontend auth)" >> $GITHUB_OUTPUT
+          echo "user-frontend=$(check_frontend user)" >> $GITHUB_OUTPUT
 
           if echo "$CHANGED" | grep -q 'docker-compose.yml'; then
             echo "docker-compose=true" >> $GITHUB_OUTPUT
@@ -72,6 +84,8 @@ jobs:
           echo "notifications: ${{ needs.detect-changes.outputs.notifications }}"
           echo "monitoring:    ${{ needs.detect-changes.outputs.monitoring }}"
           echo "incidents:     ${{ needs.detect-changes.outputs.incidents }}"
+          echo "auth-frontend: ${{ needs.detect-changes.outputs['auth-frontend'] }}"
+          echo "user-frontend: ${{ needs.detect-changes.outputs['user-frontend'] }}"
           echo "docker-compose:${{ needs.detect-changes.outputs['docker-compose'] }}"
 
       - name: Build services list
@@ -87,6 +101,8 @@ jobs:
           [ "${{ needs.detect-changes.outputs.notifications }}" = "true" ] && SERVICES="$SERVICES notification-service"
           [ "${{ needs.detect-changes.outputs.monitoring }}" = "true" ] && SERVICES="$SERVICES monitoring-service"
           [ "${{ needs.detect-changes.outputs.incidents }}" = "true" ] && SERVICES="$SERVICES incident-service"
+          [ "${{ needs.detect-changes.outputs['auth-frontend'] }}" = "true" ] && SERVICES="$SERVICES auth-frontend"
+          [ "${{ needs.detect-changes.outputs['user-frontend'] }}" = "true" ] && SERVICES="$SERVICES user-frontend"
           SERVICES="${SERVICES# }"
           SERVICES_CSV="${SERVICES// /,}"
           echo "list=$SERVICES_CSV" >> $GITHUB_OUTPUT
