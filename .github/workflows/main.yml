@@ -117,7 +117,7 @@ jobs:
         run: |
           sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} bash << EOF
             set -e
-            cd UrbanFlow-base
+            cd School/UrbanFlow-base
 
             echo "📥 Pulling base repo..."
             git pull origin develop
