@@ -100,6 +100,7 @@ services:
 
   monitoring-database:
     image: postgres:15
+    container_name: monitoring-database
     env_file:
       - .env.docker.monitoring
     volumes:
@@ -239,6 +240,7 @@ services:
 
   monitoring-service:
     build: ./modules/monitoring
+    container_name: monitoring-service
     env_file:
       - .env.docker.monitoring
     depends_on:
