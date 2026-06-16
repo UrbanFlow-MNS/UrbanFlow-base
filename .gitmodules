@@ -48,3 +48,6 @@
 	path = frontend/user
 	url = git@github.com:UrbanFlow-MNS/UrbanFlow-user-frontend.git
 	branch = develop
+[submodule "frontend/monitoring"]
+	path = frontend/monitoring
+	url = git@github.com:UrbanFlow-MNS/MonitoringWebsite-React.git
