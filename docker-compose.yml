@@ -209,6 +209,19 @@ services:
         condition: service_healthy
     networks:
       - urban-flow-network
+
+  trips-planner-service:
+    build: ./modules/trips-planner/UrbanFlow-trips-planner
+    container_name: trips-planner-service
+    env_file:
+      - .env.docker.trips-planner
+    ports:
+      - "4008:4008"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - urban-flow-network
   
   notification-service:
     build: ./modules/notifications
