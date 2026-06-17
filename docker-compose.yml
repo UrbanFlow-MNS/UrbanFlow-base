@@ -1,333 +1,349 @@
 services:
+    # External
+    rabbitmq:
+        image: rabbitmq:3-management
+        container_name: RABBIT_MQ
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+            - "15692:15692"
+        env_file:
+            - .env.docker.rabbitmq
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD", "rabbitmqctl", "status"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        command: >
+            sh -c "rabbitmq-plugins enable --offline rabbitmq_prometheus && rabbitmq-server"
 
-  # External
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: RABBIT_MQ
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-      - "15692:15692"
-    env_file:
-      - .env.docker.rabbitmq
-    networks:
-      - urban-flow-network
-    healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    command: >
-      sh -c "rabbitmq-plugins enable --offline rabbitmq_prometheus && rabbitmq-server"
+    # Databases
+    user-database:
+        image: postgres:15
+        container_name: user-database
+        env_file:
+            - .env.docker.user
+        volumes:
+            - user-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test:
+                ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_user_db"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  # Databases
-  user-database:
-    image: postgres:15
-    container_name: user-database
-    env_file:
-      - .env.docker.user
-    volumes:
-      - user-database:/var/lib/postgresql/data
-    networks:
-      - urban-flow-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_user_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    logs-database:
+        image: postgres:15
+        container_name: logs-database
+        env_file:
+            - .env.docker.logs
+        volumes:
+            - logs-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test:
+                ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_logs_db"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  logs-database:
-    image: postgres:15
-    container_name: logs-database
-    env_file:
-      - .env.docker.logs
-    volumes:
-      - logs-database:/var/lib/postgresql/data
-    networks:
-      - urban-flow-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_logs_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    trips-database:
+        image: postgres:15
+        container_name: trips-database
+        env_file:
+            - .env.docker.trips
+        ports:
+            - "5432:5432"
+        volumes:
+            - trips-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -U postgres_user -d postgres_trips_db",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  trips-database:
-    image: postgres:15
-    container_name: trips-database
-    env_file:
-      - .env.docker.trips
-    ports:
-      - "5432:5432"
-    volumes:
-      - trips-database:/var/lib/postgresql/data
-    networks:
-      - urban-flow-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_trips_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    notification-database:
+        image: postgres:15
+        container_name: notification-database
+        env_file:
+            - .env.docker.notification
+        volumes:
+            - notification-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  notification-database:
-    image: postgres:15
-    container_name: notification-database
-    env_file:
-      - .env.docker.notification
-    volumes:
-      - notification-database:/var/lib/postgresql/data
-    networks:
-      - urban-flow-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres_user"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    incident-database:
+        image: postgres:15
+        container_name: incident-database
+        env_file:
+            - .env.docker.incident
+        volumes:
+            - incident-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U user -d incidents_db"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  incident-database:
-    image: postgres:15
-    container_name: incident-database
-    env_file:
-      - .env.docker.incident
-    volumes:
-      - incident-database:/var/lib/postgresql/data
-    networks:
-      - urban-flow-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d incidents_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    monitoring-database:
+        image: postgres:15
+        container_name: monitoring-database
+        env_file:
+            - .env.docker.monitoring
+        volumes:
+            - monitoring-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres_logs"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  monitoring-database:
-    image: postgres:15
-    container_name: monitoring-database
-    env_file:
-      - .env.docker.monitoring
-    volumes:
-      - monitoring-database:/var/lib/postgresql/data
-    networks:
-      - urban-flow-network
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres_logs" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    tm-database:
+        image: postgres:15
+        container_name: tm-database
+        env_file:
+            - .env.docker.tm
+        volumes:
+            - tm-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_tm_db"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
-  tm-database:
-    image: postgres:15
-    container_name: tm-database
-    env_file:
-      - .env.docker.tm
-    volumes:
-      - tm-database:/var/lib/postgresql/data
-    networks:
-      - urban-flow-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_tm_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # Frontend
+    auth-frontend:
+        build:
+            context: ./frontend/auth
+            args:
+                VITE_API_URL: https://urbanflow.lazyy.fr
+        container_name: auth-frontend
+        ports:
+            - "10000:80"
+        depends_on:
+            - gateway-service
+        networks:
+            - urban-flow-network
 
-  # Frontend
-  auth-frontend:
-    build:
-      context: ./frontend/auth
-      args:
-        VITE_API_URL: https://urbanflow.lazyy.fr
-    container_name: auth-frontend
-    ports:
-      - "10000:80"
-    depends_on:
-      - gateway-service
-    networks:
-      - urban-flow-network
+    monitoring-frontend:
+        build:
+            context: ./frontend/monitoring
+            args:
+                VITE_API_URL: https://urbanflow.lazyy.fr
+        container_name: monitoring-frontend
+        ports:
+            - "10005:80"
+        depends_on:
+            - gateway-service
+        networks:
+            - urban-flow-network
 
-  monitoring-frontend:
-      build:
-        context: ./frontend/monitoring
-        args:
-          VITE_API_URL: https://monitoring.urbanflow.lazyy.fr
-      container_name: monitoring-frontend
-      ports:
-        - "10005:80"
-      depends_on:
-        - gateway-service
-      networks:
-        - urban-flow-network
+    incidents-frontend:
+        build:
+            context: ./frontend/incidents
+            args:
+                VITE_API_URL: https://urbanflow.lazyy.fr
+        container_name: incidents-frontend
+        ports:
+            - "10004:80"
+        depends_on:
+            - gateway-service
+        networks:
+            - urban-flow-network
 
-  # Services
-  gateway-service:
-    build: ./modules/gateway
-    container_name: gateway-service
-    env_file:
-      - .env.docker.gateway
-    ports:
-      - "4000:4000"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
+    # Services
+    gateway-service:
+        build: ./modules/gateway
+        container_name: gateway-service
+        env_file:
+            - .env.docker.gateway
+        ports:
+            - "4000:4000"
+        depends_on:
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  auth-service:
-    build: ./modules/auth
-    container_name: auth-service
-    env_file:
-      - .env.docker.auth
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
+    auth-service:
+        build: ./modules/auth
+        container_name: auth-service
+        env_file:
+            - .env.docker.auth
+        depends_on:
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  user-service:
-    build: ./modules/user
-    container_name: user-service
-    env_file:
-      - .env.docker.user
-    depends_on:
-      user-database:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
+    user-service:
+        build: ./modules/user
+        container_name: user-service
+        env_file:
+            - .env.docker.user
+        depends_on:
+            user-database:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  logs-service:
-    build: ./modules/logs
-    container_name: logs-service
-    env_file:
-      - .env.docker.logs
-    ports:
-      - "4002:4002"
-    depends_on:
-      logs-database:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
+    logs-service:
+        build: ./modules/logs
+        container_name: logs-service
+        env_file:
+            - .env.docker.logs
+        ports:
+            - "4002:4002"
+        depends_on:
+            logs-database:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  trips-service:
-    build: ./modules/trips/UrbanFlow-trips
-    container_name: trips-service
-    env_file:
-      - .env.docker.trips
-    ports:
-      - "4003:4003"
-    depends_on:
-      trips-database:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
+    trips-service:
+        build: ./modules/trips/UrbanFlow-trips
+        container_name: trips-service
+        env_file:
+            - .env.docker.trips
+        ports:
+            - "4003:4003"
+        depends_on:
+            trips-database:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  trips-planner-service:
-    build: ./modules/trips-planner/UrbanFlow-trips-planner
-    container_name: trips-planner-service
-    env_file:
-      - .env.docker.trips-planner
-    ports:
-      - "4008:4008"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
-  
-  notification-service:
-    build: ./modules/notifications
-    container_name: notification-service
-    env_file:
-      - .env.docker.notification
-    depends_on:
-      notification-database:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
+    trips-planner-service:
+        build: ./modules/trips-planner/UrbanFlow-trips-planner
+        container_name: trips-planner-service
+        env_file:
+            - .env.docker.trips-planner
+        ports:
+            - "4008:4008"
+        depends_on:
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  incident-service:
-    build: ./modules/incidents
-    container_name: incident-service
-    env_file:
-      - .env.docker.incident
-    ports:
-      - "4004:4004"
-    depends_on:
-      incident-database:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
+    notification-service:
+        build: ./modules/notifications
+        container_name: notification-service
+        env_file:
+            - .env.docker.notification
+        depends_on:
+            notification-database:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  monitoring-service:
-    build: ./modules/monitoring
-    container_name: monitoring-service
-    env_file:
-      - .env.docker.monitoring
-    depends_on:
-      monitoring-database:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
+    incident-service:
+        build: ./modules/incidents
+        container_name: incident-service
+        env_file:
+            - .env.docker.incident
+        ports:
+            - "4004:4004"
+        depends_on:
+            incident-database:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  tm-service:
-    build: ./modules/transport-management/UrbanFlow-transport-management
-    container_name: tm-service
-    env_file:
-      - .env.docker.tm
-    ports:
-      - "4009:4009"
-    depends_on:
-      tm-database:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - urban-flow-network
+    monitoring-service:
+        build: ./modules/monitoring
+        container_name: monitoring-service
+        env_file:
+            - .env.docker.monitoring
+        depends_on:
+            monitoring-database:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    networks:
-      - urban-flow-network
-    restart: unless-stopped
+    tm-service:
+        build: ./modules/transport-management/UrbanFlow-transport-management
+        container_name: tm-service
+        env_file:
+            - .env.docker.tm
+        ports:
+            - "4009:4009"
+        depends_on:
+            tm-database:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+        networks:
+            - urban-flow-network
 
-  node_exporter:
-    image: quay.io/prometheus/node-exporter:latest
-    container_name: node_exporter
-    ports:
-      - "9100:9100"
-    command:
-      - '--path.rootfs=/host'
-    networks:
-      - urban-flow-network
-    pid: host
-    restart: unless-stopped
-    volumes:
-      - '/:/host:ro'
+    prometheus:
+        image: prom/prometheus
+        container_name: prometheus
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        networks:
+            - urban-flow-network
+        restart: unless-stopped
 
+    node_exporter:
+        image: quay.io/prometheus/node-exporter:latest
+        container_name: node_exporter
+        ports:
+            - "9100:9100"
+        command:
+            - "--path.rootfs=/host"
+        networks:
+            - urban-flow-network
+        pid: host
+        restart: unless-stopped
+        volumes:
+            - "/:/host:ro"
 
 volumes:
-  user-database:
-  logs-database:
-  trips-database:
-  notification-database:
-  incident-database:
-  monitoring-database:
-  tm-database:
-
+    user-database:
+    logs-database:
+    trips-database:
+    notification-database:
+    incident-database:
+    monitoring-database:
+    tm-database:
 
 networks:
-  urban-flow-network:
-    driver: bridge
+    urban-flow-network:
+        driver: bridge
