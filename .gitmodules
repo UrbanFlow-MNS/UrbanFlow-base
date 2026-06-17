@@ -51,3 +51,4 @@
 [submodule "frontend/monitoring"]
 	path = frontend/monitoring
 	url = git@github.com:UrbanFlow-MNS/MonitoringWebsite-React.git
+	branch = develop
