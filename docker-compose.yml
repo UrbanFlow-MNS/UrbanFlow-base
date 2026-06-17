@@ -165,6 +165,7 @@ services:
             context: ./frontend/incidents
             args:
                 VITE_API_URL: https://urbanflow.lazyy.fr
+                VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
         container_name: incidents-frontend
         ports:
             - "10004:80"
