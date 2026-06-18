@@ -4,3 +4,4 @@
 /.idea
 docker-compose.yml.backup
 docker-compose.all 
+.vscode
