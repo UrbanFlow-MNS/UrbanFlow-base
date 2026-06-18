@@ -152,7 +152,7 @@ services:
             context: ./frontend/monitoring
             args:
                 VITE_API_URL: https://urbanflow.lazyy.fr
-                VITE_PROMETHEUS_URL: https://urbanflow.lazyy.fr/prometheus
+                VITE_PROMETHEUS_URL: https://urbanflow.lazyy.fr/api/prometheus
                 VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
         container_name: monitoring-frontend
         ports:
