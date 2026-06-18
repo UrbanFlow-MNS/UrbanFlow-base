@@ -6,116 +6,100 @@ on:
       - develop
 
 jobs:
-  detect-changes:
+  detect-backend:
     runs-on: ubuntu-latest
     outputs:
-      gateway: ${{ steps.changes.outputs.gateway }}
-      auth: ${{ steps.changes.outputs.auth }}
-      user: ${{ steps.changes.outputs.user }}
-      logs: ${{ steps.changes.outputs.logs }}
-      trips: ${{ steps.changes.outputs.trips }}
-      trips-planner: ${{ steps.changes.outputs.trips-planner }}
-      notifications: ${{ steps.changes.outputs.notifications }}
-      monitoring: ${{ steps.changes.outputs.monitoring }}
-      incidents: ${{ steps.changes.outputs.incidents }}
-      auth-frontend: ${{ steps.changes.outputs.auth-frontend }}
-      user-frontend: ${{ steps.changes.outputs.user-frontend }}
-      docker-compose: ${{ steps.changes.outputs.docker-compose }}
+      any: ${{ steps.check.outputs.any }}
+      services: ${{ steps.check.outputs.services }}
+      deploy_all: ${{ steps.check.outputs.deploy_all }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - name: Detect changed submodules
-        id: changes
+      - name: Detect backend changes
+        id: check
         run: |
           CHANGED=$(git diff HEAD~1 HEAD --name-only)
           echo "Changed files: $CHANGED"
 
           check() {
-            if echo "$CHANGED" | grep -q "^modules/$1"; then
-              echo "true"
-            else
-              echo "false"
-            fi
+            echo "$CHANGED" | grep -q "^modules/$1" && echo "true" || echo "false"
           }
 
-          check_frontend() {
-            if echo "$CHANGED" | grep -q "^frontend/$1"; then
-              echo "true"
-            else
-              echo "false"
-            fi
-          }
+          SERVICES=""
+          [ "$(check gateway)" = "true" ]       && SERVICES="$SERVICES gateway-service"
+          [ "$(check auth)" = "true" ]           && SERVICES="$SERVICES auth-service"
+          [ "$(check user)" = "true" ]           && SERVICES="$SERVICES user-service"
+          [ "$(check logs)" = "true" ]           && SERVICES="$SERVICES logs-service"
+          [ "$(check trips)" = "true" ]          && SERVICES="$SERVICES trips-service"
+          [ "$(check trips-planner)" = "true" ]  && SERVICES="$SERVICES trips-planner-service"
+          [ "$(check notifications)" = "true" ]  && SERVICES="$SERVICES notification-service"
+          [ "$(check monitoring)" = "true" ]     && SERVICES="$SERVICES monitoring-service"
+          [ "$(check incidents)" = "true" ]      && SERVICES="$SERVICES incident-service"
 
-          echo "gateway=$(check gateway)" >> $GITHUB_OUTPUT
-          echo "auth=$(check auth)" >> $GITHUB_OUTPUT
-          echo "user=$(check user)" >> $GITHUB_OUTPUT
-          echo "logs=$(check logs)" >> $GITHUB_OUTPUT
-          echo "trips=$(check trips)" >> $GITHUB_OUTPUT
-          echo "trips-planner=$(check trips-planner)" >> $GITHUB_OUTPUT
-          echo "notifications=$(check notifications)" >> $GITHUB_OUTPUT
-          echo "monitoring=$(check monitoring)" >> $GITHUB_OUTPUT
-          echo "incidents=$(check incidents)" >> $GITHUB_OUTPUT
-          echo "auth-frontend=$(check_frontend auth)" >> $GITHUB_OUTPUT
-          echo "user-frontend=$(check_frontend user)" >> $GITHUB_OUTPUT
+          SERVICES="${SERVICES# }"
 
           if echo "$CHANGED" | grep -q 'docker-compose.yml'; then
-            echo "docker-compose=true" >> $GITHUB_OUTPUT
+            echo "deploy_all=true" >> $GITHUB_OUTPUT
+            echo "any=true" >> $GITHUB_OUTPUT
           else
-            echo "docker-compose=false" >> $GITHUB_OUTPUT
+            echo "deploy_all=false" >> $GITHUB_OUTPUT
+            [ -n "$SERVICES" ] && echo "any=true" >> $GITHUB_OUTPUT || echo "any=false" >> $GITHUB_OUTPUT
           fi
 
-  deploy:
-    needs: detect-changes
+          echo "services=${SERVICES// /,}" >> $GITHUB_OUTPUT
+
+  detect-frontend:
+    runs-on: ubuntu-latest
+    outputs:
+      any: ${{ steps.check.outputs.any }}
+      services: ${{ steps.check.outputs.services }}
+      deploy_all: ${{ steps.check.outputs.deploy_all }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect frontend changes
+        id: check
+        run: |
+          CHANGED=$(git diff HEAD~1 HEAD --name-only)
+          echo "Changed files: $CHANGED"
+
+          check_frontend() {
+            echo "$CHANGED" | grep -q "^frontend/$1" && echo "true" || echo "false"
+          }
+
+          SERVICES=""
+          [ "$(check_frontend auth)" = "true" ]       && SERVICES="$SERVICES auth-frontend"
+          [ "$(check_frontend user)" = "true" ]       && SERVICES="$SERVICES user-frontend"
+          [ "$(check_frontend monitoring)" = "true" ] && SERVICES="$SERVICES monitoring-frontend"
+          [ "$(check_frontend incidents)" = "true" ]  && SERVICES="$SERVICES incidents-frontend"
+
+          SERVICES="${SERVICES# }"
+
+          if echo "$CHANGED" | grep -q 'docker-compose.yml'; then
+            echo "deploy_all=true" >> $GITHUB_OUTPUT
+            echo "any=true" >> $GITHUB_OUTPUT
+          else
+            echo "deploy_all=false" >> $GITHUB_OUTPUT
+            [ -n "$SERVICES" ] && echo "any=true" >> $GITHUB_OUTPUT || echo "any=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "services=${SERVICES// /,}" >> $GITHUB_OUTPUT
+
+  deploy-backend:
+    needs: detect-backend
+    if: needs.detect-backend.outputs.any == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Debug detected changes
+      - name: Deploy backend via SSH
         run: |
-          echo "gateway:       ${{ needs.detect-changes.outputs.gateway }}"
-          echo "auth:          ${{ needs.detect-changes.outputs.auth }}"
-          echo "user:          ${{ needs.detect-changes.outputs.user }}"
-          echo "logs:          ${{ needs.detect-changes.outputs.logs }}"
-          echo "trips:         ${{ needs.detect-changes.outputs.trips }}"
-          echo "trips-planner: ${{ needs.detect-changes.outputs['trips-planner'] }}"
-          echo "notifications: ${{ needs.detect-changes.outputs.notifications }}"
-          echo "monitoring:    ${{ needs.detect-changes.outputs.monitoring }}"
-          echo "incidents:     ${{ needs.detect-changes.outputs.incidents }}"
-          echo "auth-frontend: ${{ needs.detect-changes.outputs['auth-frontend'] }}"
-          echo "user-frontend: ${{ needs.detect-changes.outputs['user-frontend'] }}"
-          echo "docker-compose:${{ needs.detect-changes.outputs['docker-compose'] }}"
-
-      - name: Build services list
-        id: services
-        run: |
-          SERVICES=""
-          [ "${{ needs.detect-changes.outputs.gateway }}" = "true" ] && SERVICES="$SERVICES gateway-service"
-          [ "${{ needs.detect-changes.outputs.auth }}" = "true" ] && SERVICES="$SERVICES auth-service"
-          [ "${{ needs.detect-changes.outputs.user }}" = "true" ] && SERVICES="$SERVICES user-service"
-          [ "${{ needs.detect-changes.outputs.logs }}" = "true" ] && SERVICES="$SERVICES logs-service"
-          [ "${{ needs.detect-changes.outputs.trips }}" = "true" ] && SERVICES="$SERVICES trips-service"
-          [ "${{ needs.detect-changes.outputs['trips-planner'] }}" = "true" ] && SERVICES="$SERVICES trips-planner-service"
-          [ "${{ needs.detect-changes.outputs.notifications }}" = "true" ] && SERVICES="$SERVICES notification-service"
-          [ "${{ needs.detect-changes.outputs.monitoring }}" = "true" ] && SERVICES="$SERVICES monitoring-service"
-          [ "${{ needs.detect-changes.outputs.incidents }}" = "true" ] && SERVICES="$SERVICES incident-service"
-          [ "${{ needs.detect-changes.outputs['auth-frontend'] }}" = "true" ] && SERVICES="$SERVICES auth-frontend"
-          [ "${{ needs.detect-changes.outputs['user-frontend'] }}" = "true" ] && SERVICES="$SERVICES user-frontend"
-          SERVICES="${SERVICES# }"
-          SERVICES_CSV="${SERVICES// /,}"
-          echo "list=$SERVICES_CSV" >> $GITHUB_OUTPUT
-
-          DEPLOY_ALL="${{ needs.detect-changes.outputs['docker-compose'] }}"
-          echo "deploy_all=$DEPLOY_ALL" >> $GITHUB_OUTPUT
-
-          echo "Debug - Services: $SERVICES_CSV"
-          echo "Debug - Deploy all: $DEPLOY_ALL"
-
-      - name: Deploy via SSH
-        run: |
-          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} bash << EOF
+          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} bash << 'EOF'
             set -e
             cd School/UrbanFlow-base
 
@@ -129,21 +113,66 @@ jobs:
               git pull origin develop
             '
 
-            SERVICES="${{ steps.services.outputs.list }}"
-            DEPLOY_ALL="${{ steps.services.outputs.deploy_all }}"
+            SERVICES="${{ needs.detect-backend.outputs.services }}"
+            DEPLOY_ALL="${{ needs.detect-backend.outputs.deploy_all }}"
 
-            echo "🔍 Services to deploy: \$SERVICES"
-            echo "🔍 Deploy all: \$DEPLOY_ALL"
+            echo "🔍 Backend services to deploy: $SERVICES"
+            echo "🔍 Deploy all: $DEPLOY_ALL"
 
-            if [ "\$DEPLOY_ALL" = "true" ]; then
-              echo "🚀 docker-compose changed, redeploying all services..."
-              docker compose up -d --build
-            elif [ -n "\$SERVICES" ]; then
-              for SERVICE in \$(echo "\$SERVICES" | tr ',' ' '); do
-                echo "🚀 Redeploying \$SERVICE..."
-                docker compose up -d --build "\$SERVICE"
-              done
+            if [ "$DEPLOY_ALL" = "true" ]; then
+              echo "🚀 docker-compose changed, redeploying all backend services..."
+              docker compose up -d --build \
+                gateway-service auth-service user-service logs-service \
+                trips-service trips-planner-service notification-service \
+                monitoring-service incident-service
             else
-              echo "✅ No service to redeploy."
+              for SERVICE in $(echo "$SERVICES" | tr ',' ' '); do
+                echo "🚀 Redeploying $SERVICE..."
+                docker compose up -d --build "$SERVICE"
+              done
+            fi
+          EOF
+
+  deploy-frontend:
+    needs: [detect-frontend, deploy-backend]
+    if: |
+      needs.detect-frontend.outputs.any == 'true' &&
+      (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy frontend via SSH
+        run: |
+          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} bash << 'EOF'
+            set -e
+            cd School/UrbanFlow-base
+
+            echo "📥 Pulling base repo..."
+            git pull origin develop
+
+            echo "📥 Pulling submodules..."
+            git submodule update --init --recursive
+            git submodule foreach '
+              git checkout develop
+              git pull origin develop
+            '
+
+            SERVICES="${{ needs.detect-frontend.outputs.services }}"
+            DEPLOY_ALL="${{ needs.detect-frontend.outputs.deploy_all }}"
+
+            echo "🔍 Frontend services to deploy: $SERVICES"
+            echo "🔍 Deploy all: $DEPLOY_ALL"
+
+            if [ "$DEPLOY_ALL" = "true" ]; then
+              echo "🚀 docker-compose changed, redeploying all frontend services..."
+              docker compose up -d --build \
+                auth-frontend user-frontend monitoring-frontend incidents-frontend
+            else
+              for SERVICE in $(echo "$SERVICES" | tr ',' ' '); do
+                echo "🚀 Redeploying $SERVICE..."
+                docker compose up -d --build "$SERVICE"
+              done
             fi
           EOF
