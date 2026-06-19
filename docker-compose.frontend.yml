@@ -1,0 +1,52 @@
+services:
+    auth-frontend:
+        build:
+            context: ./frontend/auth
+            args:
+                VITE_API_URL: https://urbanflow.lazyy.fr
+        container_name: auth-frontend
+        ports:
+            - "10000:80"
+        networks:
+            - urban-flow-network
+
+    user-frontend:
+        build:
+            context: ./frontend/user
+            args:
+                VITE_API_URL: https://urbanflow.lazyy.fr
+                VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
+        container_name: user-frontend
+        ports:
+            - "10001:80"
+        networks:
+            - urban-flow-network
+
+    monitoring-frontend:
+        build:
+            context: ./frontend/monitoring
+            args:
+                VITE_API_URL: https://urbanflow.lazyy.fr
+                VITE_PROMETHEUS_URL: https://urbanflow.lazyy.fr/prometheus
+                VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
+        container_name: monitoring-frontend
+        ports:
+            - "10005:80"
+        networks:
+            - urban-flow-network
+
+    incidents-frontend:
+        build:
+            context: ./frontend/incidents
+            args:
+                VITE_API_URL: https://urbanflow.lazyy.fr
+                VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
+        container_name: incidents-frontend
+        ports:
+            - "10004:80"
+        networks:
+            - urban-flow-network
+
+networks:
+    urban-flow-network:
+        driver: bridge

@@ -134,6 +134,20 @@ services:
             retries: 5
 
     # Frontend
+    user-frontend:
+        build:
+            context: ./frontend/user
+            args:
+                VITE_API_URL: https://urbanflow.lazyy.fr
+                VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
+        container_name: user-frontend
+        ports:
+            - "10001:80"
+        depends_on:
+            - gateway-service
+        networks:
+            - urban-flow-network
+
     auth-frontend:
         build:
             context: ./frontend/auth
@@ -152,7 +166,7 @@ services:
             context: ./frontend/monitoring
             args:
                 VITE_API_URL: https://urbanflow.lazyy.fr
-                VITE_PROMETHEUS_URL: https://urbanflow.lazyy.fr/api/prometheus
+                VITE_PROMETHEUS_URL: https://urbanflow.lazyy.fr/prometheus
                 VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
         container_name: monitoring-frontend
         ports:

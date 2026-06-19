@@ -1,0 +1,48 @@
+services:
+    rabbitmq:
+        image: rabbitmq:3-management
+        container_name: RABBIT_MQ
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+            - "15692:15692"
+        env_file:
+            - .env.docker.rabbitmq
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD", "rabbitmqctl", "status"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        command: >
+            sh -c "rabbitmq-plugins enable --offline rabbitmq_prometheus && rabbitmq-server"
+
+    prometheus:
+        image: prom/prometheus
+        container_name: prometheus
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        networks:
+            - urban-flow-network
+        restart: unless-stopped
+
+    node_exporter:
+        image: quay.io/prometheus/node-exporter:latest
+        container_name: node_exporter
+        ports:
+            - "9100:9100"
+        command:
+            - "--path.rootfs=/host"
+        networks:
+            - urban-flow-network
+        pid: host
+        restart: unless-stopped
+        volumes:
+            - "/:/host:ro"
+
+networks:
+    urban-flow-network:
+        driver: bridge

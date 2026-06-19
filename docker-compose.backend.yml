@@ -1,0 +1,96 @@
+services:
+    gateway-service:
+        build: ./modules/gateway
+        container_name: gateway-service
+        env_file:
+            - .env.docker.gateway
+        ports:
+            - "4000:4000"
+        networks:
+            - urban-flow-network
+
+    auth-service:
+        build: ./modules/auth
+        container_name: auth-service
+        env_file:
+            - .env.docker.auth
+        networks:
+            - urban-flow-network
+
+    user-service:
+        build: ./modules/user
+        container_name: user-service
+        env_file:
+            - .env.docker.user
+        networks:
+            - urban-flow-network
+
+    logs-service:
+        build: ./modules/logs
+        container_name: logs-service
+        env_file:
+            - .env.docker.logs
+        ports:
+            - "4002:4002"
+        networks:
+            - urban-flow-network
+
+    trips-service:
+        build: ./modules/trips/UrbanFlow-trips
+        container_name: trips-service
+        env_file:
+            - .env.docker.trips
+        ports:
+            - "4003:4003"
+        networks:
+            - urban-flow-network
+
+    trips-planner-service:
+        build: ./modules/trips-planner/UrbanFlow-trips-planner
+        container_name: trips-planner-service
+        env_file:
+            - .env.docker.trips-planner
+        ports:
+            - "4008:4008"
+        networks:
+            - urban-flow-network
+
+    notification-service:
+        build: ./modules/notifications
+        container_name: notification-service
+        env_file:
+            - .env.docker.notification
+        networks:
+            - urban-flow-network
+
+    incident-service:
+        build: ./modules/incidents
+        container_name: incident-service
+        env_file:
+            - .env.docker.incident
+        ports:
+            - "4004:4004"
+        networks:
+            - urban-flow-network
+
+    monitoring-service:
+        build: ./modules/monitoring
+        container_name: monitoring-service
+        env_file:
+            - .env.docker.monitoring
+        networks:
+            - urban-flow-network
+
+    tm-service:
+        build: ./modules/transport-management/UrbanFlow-transport-management
+        container_name: tm-service
+        env_file:
+            - .env.docker.tm
+        ports:
+            - "4009:4009"
+        networks:
+            - urban-flow-network
+
+networks:
+    urban-flow-network:
+        driver: bridge

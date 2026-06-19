@@ -1,0 +1,120 @@
+services:
+    user-database:
+        image: postgres:15
+        container_name: user-database
+        env_file:
+            - .env.docker.user
+        volumes:
+            - user-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_user_db"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    logs-database:
+        image: postgres:15
+        container_name: logs-database
+        env_file:
+            - .env.docker.logs
+        volumes:
+            - logs-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_logs_db"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    trips-database:
+        image: postgres:15
+        container_name: trips-database
+        env_file:
+            - .env.docker.trips
+        ports:
+            - "5432:5432"
+        volumes:
+            - trips-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_trips_db"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    notification-database:
+        image: postgres:15
+        container_name: notification-database
+        env_file:
+            - .env.docker.notification
+        volumes:
+            - notification-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres_user"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    incident-database:
+        image: postgres:15
+        container_name: incident-database
+        env_file:
+            - .env.docker.incident
+        volumes:
+            - incident-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U user -d incidents_db"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    monitoring-database:
+        image: postgres:15
+        container_name: monitoring-database
+        env_file:
+            - .env.docker.monitoring
+        volumes:
+            - monitoring-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres_logs"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    tm-database:
+        image: postgres:15
+        container_name: tm-database
+        env_file:
+            - .env.docker.tm
+        volumes:
+            - tm-database:/var/lib/postgresql/data
+        networks:
+            - urban-flow-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgres_tm_db"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+volumes:
+    user-database:
+    logs-database:
+    trips-database:
+    notification-database:
+    incident-database:
+    monitoring-database:
+    tm-database:
+
+networks:
+    urban-flow-network:
+        driver: bridge

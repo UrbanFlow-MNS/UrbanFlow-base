@@ -115,20 +115,21 @@ jobs:
 
             SERVICES="${{ needs.detect-backend.outputs.services }}"
             DEPLOY_ALL="${{ needs.detect-backend.outputs.deploy_all }}"
+            COMPOSE="-f docker-compose.tools.yml -f docker-compose.databases.yml -f docker-compose.backend.yml"
 
             echo "🔍 Backend services to deploy: $SERVICES"
             echo "🔍 Deploy all: $DEPLOY_ALL"
 
             if [ "$DEPLOY_ALL" = "true" ]; then
               echo "🚀 docker-compose changed, redeploying all backend services..."
-              docker compose up -d --build \
+              docker compose $COMPOSE up -d --build \
                 gateway-service auth-service user-service logs-service \
                 trips-service trips-planner-service notification-service \
                 monitoring-service incident-service
             else
               for SERVICE in $(echo "$SERVICES" | tr ',' ' '); do
                 echo "🚀 Redeploying $SERVICE..."
-                docker compose up -d --build "$SERVICE"
+                docker compose $COMPOSE up -d --build "$SERVICE"
               done
             fi
           EOF
@@ -162,18 +163,19 @@ jobs:
 
             SERVICES="${{ needs.detect-frontend.outputs.services }}"
             DEPLOY_ALL="${{ needs.detect-frontend.outputs.deploy_all }}"
+            COMPOSE="-f docker-compose.frontend.yml"
 
             echo "🔍 Frontend services to deploy: $SERVICES"
             echo "🔍 Deploy all: $DEPLOY_ALL"
 
             if [ "$DEPLOY_ALL" = "true" ]; then
               echo "🚀 docker-compose changed, redeploying all frontend services..."
-              docker compose up -d --build \
+              docker compose $COMPOSE up -d --build \
                 auth-frontend user-frontend monitoring-frontend incidents-frontend
             else
               for SERVICE in $(echo "$SERVICES" | tr ',' ' '); do
                 echo "🚀 Redeploying $SERVICE..."
-                docker compose up -d --build "$SERVICE"
+                docker compose $COMPOSE up -d --build "$SERVICE"
               done
             fi
           EOF
