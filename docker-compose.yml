@@ -142,7 +142,7 @@ services:
                 VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
         container_name: user-frontend
         ports:
-            - "10001:80"
+            - "10006:80"
         depends_on:
             - gateway-service
         networks:
