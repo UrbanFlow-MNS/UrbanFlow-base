@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-config
+  namespace: urbanflow
+data:
+  API_PORT: "4001"
+  TCP_PORT: "6001"
+  ENABLE_RABBITMQ: "true"
+  USER_SERVICE_HOST: "user-service"
+  USER_SERVICE_TCP_PORT: "6006"
