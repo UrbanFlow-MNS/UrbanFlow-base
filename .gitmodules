@@ -52,3 +52,11 @@
 	path = frontend/monitoring
 	url = git@github.com:UrbanFlow-MNS/MonitoringWebsite-React.git
 	branch = develop
+[submodule "modules/shared"]
+	path = modules/shared
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-shared.git
+	branch = develop
+[submodule "modules/proto"]
+	path = modules/proto
+	url = git@github.com:UrbanFlow-MNS/UrbanFlow-proto.git
+	branch = develop
