@@ -2,6 +2,7 @@ services:
     gateway-service:
         build: ./modules/gateway
         container_name: gateway-service
+        restart: always
         env_file:
             - .env.docker.gateway
         ports:
@@ -12,6 +13,7 @@ services:
     auth-service:
         build: ./modules/auth
         container_name: auth-service
+        restart: always
         env_file:
             - .env.docker.auth
         networks:
@@ -20,6 +22,7 @@ services:
     user-service:
         build: ./modules/user
         container_name: user-service
+        restart: always
         env_file:
             - .env.docker.user
         networks:
@@ -28,6 +31,7 @@ services:
     logs-service:
         build: ./modules/logs
         container_name: logs-service
+        restart: always
         env_file:
             - .env.docker.logs
         ports:
@@ -38,6 +42,7 @@ services:
     trips-service:
         build: ./modules/trips/UrbanFlow-trips
         container_name: trips-service
+        restart: always
         env_file:
             - .env.docker.trips
         ports:
@@ -48,6 +53,7 @@ services:
     trips-planner-service:
         build: ./modules/trips-planner/UrbanFlow-trips-planner
         container_name: trips-planner-service
+        restart: always
         env_file:
             - .env.docker.trips-planner
         ports:
@@ -58,6 +64,7 @@ services:
     notification-service:
         build: ./modules/notifications
         container_name: notification-service
+        restart: always
         env_file:
             - .env.docker.notification
         networks:
@@ -66,6 +73,7 @@ services:
     incident-service:
         build: ./modules/incidents
         container_name: incident-service
+        restart: always
         env_file:
             - .env.docker.incident
         ports:
@@ -76,6 +84,7 @@ services:
     monitoring-service:
         build: ./modules/monitoring
         container_name: monitoring-service
+        restart: always
         env_file:
             - .env.docker.monitoring
         networks:
@@ -84,6 +93,7 @@ services:
     tm-service:
         build: ./modules/transport-management/UrbanFlow-transport-management
         container_name: tm-service
+        restart: always
         env_file:
             - .env.docker.tm
         ports:

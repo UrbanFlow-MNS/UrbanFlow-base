@@ -3,6 +3,7 @@ services:
     rabbitmq:
         image: rabbitmq:3-management
         container_name: RABBIT_MQ
+        restart: always
         ports:
             - "5672:5672"
             - "15672:15672"
@@ -23,6 +24,7 @@ services:
     user-database:
         image: postgres:15
         container_name: user-database
+        restart: always
         env_file:
             - .env.docker.user
         volumes:
@@ -39,6 +41,7 @@ services:
     logs-database:
         image: postgres:15
         container_name: logs-database
+        restart: always
         env_file:
             - .env.docker.logs
         volumes:
@@ -55,6 +58,7 @@ services:
     trips-database:
         image: postgres:15
         container_name: trips-database
+        restart: always
         env_file:
             - .env.docker.trips
         ports:
@@ -76,6 +80,7 @@ services:
     notification-database:
         image: postgres:15
         container_name: notification-database
+        restart: always
         env_file:
             - .env.docker.notification
         volumes:
@@ -91,6 +96,7 @@ services:
     incident-database:
         image: postgres:15
         container_name: incident-database
+        restart: always
         env_file:
             - .env.docker.incident
         volumes:
@@ -106,6 +112,7 @@ services:
     monitoring-database:
         image: postgres:15
         container_name: monitoring-database
+        restart: always
         env_file:
             - .env.docker.monitoring
         volumes:
@@ -121,6 +128,7 @@ services:
     tm-database:
         image: postgres:15
         container_name: tm-database
+        restart: always
         env_file:
             - .env.docker.tm
         volumes:
@@ -141,6 +149,7 @@ services:
                 VITE_API_URL: https://urbanflow.lazyy.fr
                 VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
         container_name: user-frontend
+        restart: always
         ports:
             - "10006:80"
         depends_on:
@@ -154,6 +163,7 @@ services:
             args:
                 VITE_API_URL: https://urbanflow.lazyy.fr
         container_name: auth-frontend
+        restart: always
         ports:
             - "10000:80"
         depends_on:
@@ -169,6 +179,7 @@ services:
                 VITE_PROMETHEUS_URL: https://urbanflow.lazyy.fr/prometheus
                 VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
         container_name: monitoring-frontend
+        restart: always
         ports:
             - "10005:80"
         depends_on:
@@ -183,6 +194,7 @@ services:
                 VITE_API_URL: https://urbanflow.lazyy.fr
                 VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
         container_name: incidents-frontend
+        restart: always
         ports:
             - "10004:80"
         depends_on:
@@ -194,6 +206,7 @@ services:
     gateway-service:
         build: ./modules/gateway
         container_name: gateway-service
+        restart: always
         env_file:
             - .env.docker.gateway
         ports:
@@ -207,6 +220,7 @@ services:
     auth-service:
         build: ./modules/auth
         container_name: auth-service
+        restart: always
         env_file:
             - .env.docker.auth
         depends_on:
@@ -218,6 +232,7 @@ services:
     user-service:
         build: ./modules/user
         container_name: user-service
+        restart: always
         env_file:
             - .env.docker.user
         depends_on:
@@ -231,6 +246,7 @@ services:
     logs-service:
         build: ./modules/logs
         container_name: logs-service
+        restart: always
         env_file:
             - .env.docker.logs
         ports:
@@ -246,6 +262,7 @@ services:
     trips-service:
         build: ./modules/trips/UrbanFlow-trips
         container_name: trips-service
+        restart: always
         env_file:
             - .env.docker.trips
         ports:
@@ -261,6 +278,7 @@ services:
     trips-planner-service:
         build: ./modules/trips-planner/UrbanFlow-trips-planner
         container_name: trips-planner-service
+        restart: always
         env_file:
             - .env.docker.trips-planner
         ports:
@@ -274,6 +292,7 @@ services:
     notification-service:
         build: ./modules/notifications
         container_name: notification-service
+        restart: always
         env_file:
             - .env.docker.notification
         depends_on:
@@ -287,6 +306,7 @@ services:
     incident-service:
         build: ./modules/incidents
         container_name: incident-service
+        restart: always
         env_file:
             - .env.docker.incident
         ports:
@@ -302,6 +322,7 @@ services:
     monitoring-service:
         build: ./modules/monitoring
         container_name: monitoring-service
+        restart: always
         env_file:
             - .env.docker.monitoring
         depends_on:
@@ -315,6 +336,7 @@ services:
     tm-service:
         build: ./modules/transport-management/UrbanFlow-transport-management
         container_name: tm-service
+        restart: always
         env_file:
             - .env.docker.tm
         ports:
@@ -336,7 +358,7 @@ services:
             - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
         networks:
             - urban-flow-network
-        restart: unless-stopped
+        restart: always
 
     node_exporter:
         image: quay.io/prometheus/node-exporter:latest
@@ -348,7 +370,7 @@ services:
         networks:
             - urban-flow-network
         pid: host
-        restart: unless-stopped
+        restart: always
         volumes:
             - "/:/host:ro"
 

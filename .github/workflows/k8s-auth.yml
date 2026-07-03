@@ -1,0 +1,53 @@
+name: Build and deploy auth to K8s
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'modules/auth'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push auth image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./modules/auth
+          push: true
+          platforms: linux/amd64
+          tags: ghcr.io/urbanflow-mns/urbanflow-auth:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy to K8s via SSH
+        run: |
+          sshpass -p "${{ secrets.PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} bash << 'EOF'
+            set -e
+            kubectl rollout restart deployment/auth-service -n urbanflow
+            kubectl rollout status deployment/auth-service -n urbanflow --timeout=120s
+          EOF

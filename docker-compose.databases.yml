@@ -2,6 +2,7 @@ services:
     user-database:
         image: postgres:15
         container_name: user-database
+        restart: always
         env_file:
             - .env.docker.user
         volumes:
@@ -17,6 +18,7 @@ services:
     logs-database:
         image: postgres:15
         container_name: logs-database
+        restart: always
         env_file:
             - .env.docker.logs
         volumes:
@@ -32,6 +34,7 @@ services:
     trips-database:
         image: postgres:15
         container_name: trips-database
+        restart: always
         env_file:
             - .env.docker.trips
         ports:
@@ -49,6 +52,7 @@ services:
     notification-database:
         image: postgres:15
         container_name: notification-database
+        restart: always
         env_file:
             - .env.docker.notification
         volumes:
@@ -64,6 +68,7 @@ services:
     incident-database:
         image: postgres:15
         container_name: incident-database
+        restart: always
         env_file:
             - .env.docker.incident
         volumes:
@@ -79,6 +84,7 @@ services:
     monitoring-database:
         image: postgres:15
         container_name: monitoring-database
+        restart: always
         env_file:
             - .env.docker.monitoring
         volumes:
@@ -94,6 +100,7 @@ services:
     tm-database:
         image: postgres:15
         container_name: tm-database
+        restart: always
         env_file:
             - .env.docker.tm
         volumes:

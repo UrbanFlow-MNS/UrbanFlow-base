@@ -29,7 +29,6 @@ jobs:
 
           SERVICES=""
           [ "$(check gateway)" = "true" ]       && SERVICES="$SERVICES gateway-service"
-          [ "$(check auth)" = "true" ]           && SERVICES="$SERVICES auth-service"
           [ "$(check user)" = "true" ]           && SERVICES="$SERVICES user-service"
           [ "$(check logs)" = "true" ]           && SERVICES="$SERVICES logs-service"
           [ "$(check trips)" = "true" ]          && SERVICES="$SERVICES trips-service"
@@ -126,7 +125,7 @@ jobs:
                 -f docker-compose.databases.yml \
                 -f docker-compose.backend.yml \
                 up -d --build \
-                gateway-service auth-service user-service logs-service \
+                gateway-service user-service logs-service \
                 trips-service trips-planner-service notification-service \
                 monitoring-service incident-service
             else
