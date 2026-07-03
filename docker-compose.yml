@@ -209,6 +209,8 @@ services:
         restart: always
         env_file:
             - .env.docker.gateway
+        environment:
+            PROMETHEUS_URL: http://prometheus:9090
         ports:
             - "4000:4000"
         depends_on:
