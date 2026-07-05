@@ -1,6 +1,8 @@
 services:
     gateway-service:
-        build: ./modules/gateway
+        build:
+            context: .
+            dockerfile: modules/gateway/Dockerfile
         container_name: gateway-service
         restart: always
         env_file:
@@ -13,7 +15,9 @@ services:
             - urban-flow-network
 
     auth-service:
-        build: ./modules/auth
+        build:
+            context: .
+            dockerfile: modules/auth/Dockerfile
         container_name: auth-service
         restart: always
         env_file:
@@ -22,7 +26,9 @@ services:
             - urban-flow-network
 
     user-service:
-        build: ./modules/user
+        build:
+            context: .
+            dockerfile: modules/user/Dockerfile
         container_name: user-service
         restart: always
         env_file:

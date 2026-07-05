@@ -32,7 +32,8 @@ jobs:
       - name: Build and push auth image
         uses: docker/build-push-action@v6
         with:
-          context: ./modules/auth
+          context: .
+          file: modules/auth/Dockerfile
           push: true
           platforms: linux/amd64
           tags: ghcr.io/urbanflow-mns/urbanflow-auth:latest
