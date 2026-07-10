@@ -1,0 +1,26 @@
+# Restrict who can reach the auth pod on its internal TCP microservice
+# port. Only the gateway pod is allowed to open a connection on that
+# port.
+#
+# Pod selectors follow the existing `app: <service>-name` scheme used in
+# k8s/auth/deployment.yaml. If the gateway is later deployed with a different
+# label, update `podSelector.matchLabels` in the `from` block below.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: auth-tcp-restrict
+  namespace: urbanflow
+spec:
+  podSelector:
+    matchLabels:
+      app: auth-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: gateway-service
+      ports:
+        - protocol: TCP
+          port: 6001
