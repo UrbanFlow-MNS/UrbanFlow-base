@@ -1,0 +1,44 @@
+name: Backend Tests & Sonar
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  test:
+    name: Test & analyze (${{ matrix.module }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - auth
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: modules/${{ matrix.module }}
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: modules/${{ matrix.module }}
+        run: npm run test:cov
+
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        with:
+          projectBaseDir: modules/${{ matrix.module }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
