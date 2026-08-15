@@ -1,3 +1,17 @@
+x-pg-backup: &pg-backup
+    image: prodrigestivill/postgres-backup-local:15
+    restart: always
+    networks:
+        - urban-flow-network
+
+x-pg-backup-env: &pg-backup-env
+    POSTGRES_PORT: 5432
+    SCHEDULE: "@daily"
+    BACKUP_KEEP_DAYS: 7
+    BACKUP_KEEP_WEEKS: 4
+    BACKUP_KEEP_MONTHS: 6
+    POSTGRES_EXTRA_OPTS: "-Z6 --no-owner"
+
 services:
     user-database:
         image: postgres:15
@@ -112,6 +126,104 @@ services:
             interval: 10s
             timeout: 5s
             retries: 5
+
+    user-database-backup:
+        <<: *pg-backup
+        container_name: user-database-backup
+        env_file:
+            - .env.docker.user
+        environment:
+            <<: *pg-backup-env
+            POSTGRES_HOST: user-database
+        volumes:
+            - ./backups/user:/backups
+        depends_on:
+            user-database:
+                condition: service_healthy
+
+    logs-database-backup:
+        <<: *pg-backup
+        container_name: logs-database-backup
+        env_file:
+            - .env.docker.logs
+        environment:
+            <<: *pg-backup-env
+            POSTGRES_HOST: logs-database
+        volumes:
+            - ./backups/logs:/backups
+        depends_on:
+            logs-database:
+                condition: service_healthy
+
+    trips-database-backup:
+        <<: *pg-backup
+        container_name: trips-database-backup
+        env_file:
+            - .env.docker.trips
+        environment:
+            <<: *pg-backup-env
+            POSTGRES_HOST: trips-database
+        volumes:
+            - ./backups/trips:/backups
+        depends_on:
+            trips-database:
+                condition: service_healthy
+
+    notification-database-backup:
+        <<: *pg-backup
+        container_name: notification-database-backup
+        env_file:
+            - .env.docker.notification
+        environment:
+            <<: *pg-backup-env
+            POSTGRES_HOST: notification-database
+        volumes:
+            - ./backups/notification:/backups
+        depends_on:
+            notification-database:
+                condition: service_healthy
+
+    incident-database-backup:
+        <<: *pg-backup
+        container_name: incident-database-backup
+        env_file:
+            - .env.docker.incident
+        environment:
+            <<: *pg-backup-env
+            POSTGRES_HOST: incident-database
+        volumes:
+            - ./backups/incident:/backups
+        depends_on:
+            incident-database:
+                condition: service_healthy
+
+    monitoring-database-backup:
+        <<: *pg-backup
+        container_name: monitoring-database-backup
+        env_file:
+            - .env.docker.monitoring
+        environment:
+            <<: *pg-backup-env
+            POSTGRES_HOST: monitoring-database
+        volumes:
+            - ./backups/monitoring:/backups
+        depends_on:
+            monitoring-database:
+                condition: service_healthy
+
+    tm-database-backup:
+        <<: *pg-backup
+        container_name: tm-database-backup
+        env_file:
+            - .env.docker.tm
+        environment:
+            <<: *pg-backup-env
+            POSTGRES_HOST: tm-database
+        volumes:
+            - ./backups/tm:/backups
+        depends_on:
+            tm-database:
+                condition: service_healthy
 
 volumes:
     user-database:

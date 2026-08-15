@@ -112,6 +112,9 @@ jobs:
               git pull origin develop
             '
 
+            echo "🗄️  Ensuring databases and backups are up..."
+            docker compose -f docker-compose.databases.yml up -d
+
             SERVICES="${{ needs.detect-backend.outputs.services }}"
             DEPLOY_ALL="${{ needs.detect-backend.outputs.deploy_all }}"
 
