@@ -146,8 +146,8 @@ services:
         build:
             context: ./frontend/user
             args:
-                VITE_API_URL: https://urbanflow.lazyy.fr
-                VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
+                VITE_API_URL: http://localhost:4000
+                VITE_AUTH_URL: http://localhost:10000
         container_name: user-frontend
         restart: always
         ports:
@@ -161,7 +161,7 @@ services:
         build:
             context: ./frontend/auth
             args:
-                VITE_API_URL: https://urbanflow.lazyy.fr
+                VITE_API_URL: http://localhost:4000
         container_name: auth-frontend
         restart: always
         ports:
@@ -175,9 +175,9 @@ services:
         build:
             context: ./frontend/monitoring
             args:
-                VITE_API_URL: https://urbanflow.lazyy.fr
-                VITE_PROMETHEUS_URL: https://urbanflow.lazyy.fr/prometheus
-                VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
+                VITE_API_URL: http://localhost:4000
+                VITE_PROMETHEUS_URL: http://localhost:9090
+                VITE_AUTH_URL: http://localhost:10000
         container_name: monitoring-frontend
         restart: always
         ports:
@@ -191,8 +191,8 @@ services:
         build:
             context: ./frontend/incidents
             args:
-                VITE_API_URL: https://urbanflow.lazyy.fr
-                VITE_AUTH_URL: https://auth.urbanflow.lazyy.fr
+                VITE_API_URL: http://localhost:4000
+                VITE_AUTH_URL: http://localhost:10000
         container_name: incidents-frontend
         restart: always
         ports:
