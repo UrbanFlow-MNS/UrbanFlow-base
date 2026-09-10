@@ -6,6 +6,10 @@ on:
       - develop
 
 jobs:
+  test:
+    uses: ./.github/workflows/backend-tests.yml
+    secrets: inherit
+
   detect-backend:
     runs-on: ubuntu-latest
     outputs:
@@ -89,7 +93,7 @@ jobs:
           echo "services=${SERVICES// /,}" >> $GITHUB_OUTPUT
 
   deploy-backend:
-    needs: detect-backend
+    needs: [detect-backend, test]
     if: needs.detect-backend.outputs.any == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -144,9 +148,10 @@ jobs:
           EOF
 
   deploy-frontend:
-    needs: [detect-frontend, deploy-backend]
+    needs: [detect-frontend, deploy-backend, test]
     if: |
       always() &&
+      needs.test.result == 'success' &&
       needs.detect-frontend.outputs.any == 'true' &&
       (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped')
     runs-on: ubuntu-latest

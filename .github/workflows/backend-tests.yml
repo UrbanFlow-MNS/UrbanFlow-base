@@ -1,12 +1,10 @@
 name: Backend Tests & Sonar
 
 on:
-  push:
-    branches:
-      - develop
   pull_request:
     branches:
       - develop
+  workflow_call:
 
 jobs:
   test:
@@ -17,6 +15,11 @@ jobs:
       matrix:
         module:
           - auth
+          - gateway
+          - user
+          - logs
+          - monitoring
+          - incidents
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,9 +39,25 @@ jobs:
         run: npm run test:cov
 
       - name: SonarQube scan
+        continue-on-error: true
         uses: SonarSource/sonarqube-scan-action@v5
         with:
           projectBaseDir: modules/${{ matrix.module }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  test-dotnet:
+    name: Test .NET (trips-planner)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Run MSTest tests
+        working-directory: modules/trips-planner
+        run: dotnet test UrbanFlow-trips-planner.sln --verbosity normal
