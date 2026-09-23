@@ -263,8 +263,6 @@ services:
         restart: always
         env_file:
             - .env.docker.logs
-        ports:
-            - "4002:4002"
         depends_on:
             logs-database:
                 condition: service_healthy
@@ -279,8 +277,6 @@ services:
         restart: always
         env_file:
             - .env.docker.trips
-        ports:
-            - "4003:4003"
         depends_on:
             trips-database:
                 condition: service_healthy
@@ -295,8 +291,6 @@ services:
         restart: always
         env_file:
             - .env.docker.trips-planner
-        ports:
-            - "4008:4008"
         depends_on:
             rabbitmq:
                 condition: service_healthy
@@ -323,8 +317,6 @@ services:
         restart: always
         env_file:
             - .env.docker.incident
-        ports:
-            - "4004:4004"
         depends_on:
             incident-database:
                 condition: service_healthy
@@ -353,8 +345,6 @@ services:
         restart: always
         env_file:
             - .env.docker.tm
-        ports:
-            - "4009:4009"
         depends_on:
             tm-database:
                 condition: service_healthy
